@@ -49,7 +49,7 @@ spa.fake = (function () {
 	};
 
 	mockSio = (function () {
-		var on_sio, emit_sion, callback_map = {};
+		var on_sio, emit_sio, callback_map = {};
 		/*
 		 *         这个方法给某个消息类型注册回调函数。比如，on_sio('userupdate',completeLogin)
 		 *         会给userupdate的消息类型这次回调函数completeLogin
@@ -59,7 +59,7 @@ spa.fake = (function () {
 			callback[msg_type] = callback;
 		};
 
-		emit_sion = function(msg_type,data){
+		emit_sio = function(msg_type,data){
 			if(msg_type === 'adduser' && callback_map.userupdate){
 				setTimeout(function(){
 					callback_map.userupdate({

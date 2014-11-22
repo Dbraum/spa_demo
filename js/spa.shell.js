@@ -20,11 +20,13 @@ spa.shell = (function () {
       },
       resize_interval : 200,
       main_html : String()
-        + '<div class="spa-shell-head">'
-          + '<div class="spa-shell-head-logo"></div>'
-          + '<div class="spa-shell-head-acct"></div>'
-          + '<div class="spa-shell-head-search"></div>'
-        + '</div>'
+	    + '<div class="spa-shell-head">'
+	      + '<div class="spa-shell-head-logo">'
+	      + '<h1>SPA</h1>'
+	      + '<p>javascript end to end</p>'
+	      + '</div>'
+	      + '<div class="spa-shell-head-acct"></div>'
+	      + '</div>'
         + '<div class="spa-shell-main">'
           + '<div class="spa-shell-main-nav"></div>'
           + '<div class="spa-shell-main-content"></div>'

@@ -244,7 +244,7 @@ spa.shell = (function () {
 	}
 
 	//创建onLogout事件处理函数。这会把用户区的文字恢复为“Please sign-in”
-	onLogin = function(event,login_user){
+	onLogout = function(event,login_user){
 		jqueryMap.$acct.text("Please sign-in") ;
 	}
 
@@ -325,7 +325,7 @@ spa.shell = (function () {
 		//初始化用户区的文字。在用户区上，绑定点击事件
 		jqueryMap.$acct
 			.text("Please sign-in")
-			.bind(onTapAcct);
+			.bind("utap",onTapAcct);
 
 	};
 	// End PUBLIC method /initModule/

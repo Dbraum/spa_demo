@@ -56,17 +56,19 @@ spa.fake = (function () {
 		 *         回调函数的参数是通过调用emit_sion的date参数
 		 */
 		on_sio = function (msg_type, callback) {
-			callback[msg_type] = callback;
+			callback_map[msg_type] = callback;
 		};
 
 		emit_sio = function(msg_type,data){
 			if(msg_type === 'adduser' && callback_map.userupdate){
 				setTimeout(function(){
-					callback_map.userupdate({
-						_id : makeFakeId()  ,
-						name : data.name ,
-						css_map : data.css_map
-					});
+					callback_map.userupdate(
+						[{
+							_id : makeFakeId()  ,
+							name : data.name ,
+							css_map : data.css_map
+						}]
+					);
 				},3000) ;
 
 			}

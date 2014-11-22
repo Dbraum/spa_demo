@@ -70,6 +70,24 @@ spa.model = (function (){
 	//     presentation.
 	//
 
+	// chat对象需要暴露的API
+	// ---------------------
+	//提供加入或者离开聊天室的方法
+	//提供更换听者的方法
+	//提供向其他人发送消息的方法
+	//提供通知服务器用户更新了头像的方法
+	//当听者不管是何原因而需要更改消息框的时候，发布一个事件。比如，假如用户发送或者接收消息
+	//当不管是何原因而导致在线人员列表发送变化，比如，假如某人加入或者离开聊天室，或者任意用户移动了头像
+	//jion() --加入聊天室。如果用户是匿名的，该方法应该终止并返回false
+	//get_chatee() --返回正在与之聊天的person对象。如果没有听者，则返回null
+	//set_chatee(<person_id>) --根据唯一的person_id，把person对象设置为听者。该方法应该发布spa-setchatee事件，携带的数据听者的
+	//  信息。如果在线人员集合中找不到需要匹配的person对象，则把听者设置为null。如果请求的人员已经是听者，则返回false
+	//send_message(<msg_text>) --想听者发送消息。应该发布spa-updatechat事件，携带的数据是消息信息。如果用户是匿名的或者听者为null
+	//该方法应该不做操作并返回false
+	//update_avatar(<update_avatar_map>) --更新person对象的头像信息。参数(<update_avatar_map>)应该包含person_id和css_map属性
+
+
+
     personProto = {
         get_is_user : function(){
             return this.cid === stateMap.user.cid ;

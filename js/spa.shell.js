@@ -228,7 +228,7 @@ spa.shell = (function () {
 	 *  然后调用spa.model.people.login(<name>)方法，如果用户已经登陆，则调用spa.model.people.logout方法
 	 */
 	onTapAcct = function (event) {
-		var acct_text, user_name, user = spa.model.people.get_user() ;
+		var  user_name, user = spa.model.people.get_user() ;
 		if(user.get_is_anon()){
 			user_name = prompt("Please sign-in") ;
 			spa.model.people.login(user_name) ;
@@ -236,6 +236,7 @@ spa.shell = (function () {
 		}else{
 			sap.model.people.logout() ;
 		}
+		return false ;
 	};
 	//创建onLogin事件处理函数。这会更新用户区，把"Please sign-in"替换为用户名。用户名由
 	//login_user对象提供,该对象由spa-login事件发布

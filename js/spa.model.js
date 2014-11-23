@@ -19,6 +19,7 @@ spa.model = (function (){
             anon_user      : null,
             people_cid_map : {},
 	        cid_serial : 0 ,
+	        is_connected : false ,//表示用户目前是否在聊天室中
             people_db      : TAFFY(),
 	        user : null
         },
@@ -70,21 +71,7 @@ spa.model = (function (){
 	//     presentation.
 	//
 
-	// chat对象需要暴露的API
-	// ---------------------
-	//提供加入或者离开聊天室的方法
-	//提供更换听者的方法
-	//提供向其他人发送消息的方法
-	//提供通知服务器用户更新了头像的方法
-	//当听者不管是何原因而需要更改消息框的时候，发布一个事件。比如，假如用户发送或者接收消息
-	//当不管是何原因而导致在线人员列表发送变化，比如，假如某人加入或者离开聊天室，或者任意用户移动了头像
-	//jion() --加入聊天室。如果用户是匿名的，该方法应该终止并返回false
-	//get_chatee() --返回正在与之聊天的person对象。如果没有听者，则返回null
-	//set_chatee(<person_id>) --根据唯一的person_id，把person对象设置为听者。该方法应该发布spa-setchatee事件，携带的数据听者的
-	//  信息。如果在线人员集合中找不到需要匹配的person对象，则把听者设置为null。如果请求的人员已经是听者，则返回false
-	//send_message(<msg_text>) --想听者发送消息。应该发布spa-updatechat事件，携带的数据是消息信息。如果用户是匿名的或者听者为null
-	//该方法应该不做操作并返回false
-	//update_avatar(<update_avatar_map>) --更新person对象的头像信息。参数(<update_avatar_map>)应该包含person_id和css_map属性
+
 
 
 
@@ -219,6 +206,98 @@ spa.model = (function (){
 		};
 	})();
 
+
+	// chat对象需要暴露的API
+	// ---------------------
+	//提供加入或者离开聊天室的方法
+	//提供更换听者的方法
+	//提供向其他人发送消息的方法
+	//提供通知服务器用户更新了头像的方法
+	//当听者不管是何原因而需要更改消息框的时候，发布一个事件。比如，假如用户发送或者接收消息
+	//当不管是何原因而导致在线人员列表发送变化，比如，假如某人加入或者离开聊天室，或者任意用户移动了头像
+	//jion() --加入聊天室。如果用户是匿名的，该方法应该终止并返回false
+	//get_chatee() --返回正在与之聊天的person对象。如果没有听者，则返回null
+	//set_chatee(<person_id>) --根据唯一的person_id，把person对象设置为听者。该方法应该发布spa-setchatee事件，携带的数据听者的
+	//  信息。如果在线人员集合中找不到需要匹配的person对象，则把听者设置为null。如果请求的人员已经是听者，则返回false
+	//send_message(<msg_text>) --想听者发送消息。应该发布spa-updatechat事件，携带的数据是消息信息。如果用户是匿名的或者听者为null
+	//该方法应该不做操作并返回false
+	//update_avatar(<update_avatar_map>) --更新person对象的头像信息。参数(<update_avatar_map>)应该包含person_id和css_map属性
+	chat = (function(){
+		var _publish_listchange,
+			_update_list,_leave_chat,join_chat ;
+
+		//当收到新的人员列表时，用来刷新people对象
+		_update_list = function(arg_list){
+			var i,person_map,make_person_map,
+				people_list = arg_list[0] ;
+
+			clearPeopleDb() ;
+
+			PERSON :
+			for(i=0;i<people_list.length;i++){
+				person_map = people_list[i] ;
+				if(!person_map.name){
+					continue PERSON ;
+				}
+
+				if(stateMap.user && stateMap.user.id === person_map._id){
+					stateMap.user.css_map = person_map.css_map ;
+					continue PERSON ;
+				}
+
+				make_person_map = {
+					cid : person_map._id ,
+					css_map : person_map.css_map,
+					id : person_map_id,
+					name : person_map.name
+				};
+
+				makePerson(make_person_map) ;
+			}
+
+			stateMap.people_db.sort("name") ;
+
+		};
+		//创建_publish_listchange,用来发布spa-listchange全局jQuery事件，携带的数据是更新的人员列表。
+		//每当接收到来自后端的listchange消息时，我们需要使用该方法
+		_publish_listchange = function(arg_list){
+			_update_list(arg_list) ;
+			$.gevent.publish('spa-listchange',[arg_list]) ;
+		}
+
+		//_leave_chat会向后端发送leavechat消息，并清理状态
+		_leave_chat = function(){
+			var sio = isFakeData? spa.fake.mockSio : spa.data.getSio() ;
+			stateMap.is_connected = false ;
+			if(sio){
+				sio.emit('leavechat') ;
+			}
+		}
+		//j
+		join_chat = function(){
+			var sio ;
+
+			if(stateMap.is_connected){
+				return false ;
+			}
+
+			if(stateMap.user.get_is_anon()){
+				console.warn('User must be defined before joining chat') ;
+				return false ;
+			}
+
+			sio = isFakeData ? spa.fake.mockSio : spa.data.getSio() ;
+
+			sio.on('listchange',_publish_listchange);
+			stateMap.is_connected = true ;
+			return true ;
+		}
+
+		return {
+			_leave : _leave_chat ,
+			join : join_chat
+		}
+	})();
 	initModule = function(){
 		var i , people_list , person_map ;
 
